@@ -29,17 +29,40 @@ function renderCafe(doc){
     });
 }
 
+//=============================================
 // getting data
-
+//=============================================
 // Filtering:
 //db.collection('cafes').where("city", "==", "Sydney").get().then(snapshot => {
-db.collection('cafes').get().then(snapshot => {
+// Ordering:
+// db.collection('cafes').orderBy("name").get().then(snapshot => {
+// Combinging. (Filtering, then ordering):
+// db.collection('cafes').where("city", "==", "Marioland").orderBy("name").get().then(snapshot => {
+
+// Get once:
+/* db.collection('cafes').get().then(snapshot => {
     snapshot.docs.forEach(doc => {
         renderCafe(doc);
     });
+});  */
+
+// React to changes:
+db.collection('cafes').orderBy("name").onSnapshot(snapshot => {
+    let changes = snapshot.docChanges();
+    changes.forEach(change => {
+        if (change.type === "added") { // Added, as well as initial (because you add them when page is loaded.)
+            renderCafe(change.doc);
+        } else if (change.type === "removed") {
+            let li = cafeList.querySelector(`[data-id=${change.doc.id}]`);
+            cafeList.removeChild(li);
+        }
+    });
+
 });
 
+//=============================================
 // Saving data
+//=============================================
 form.addEventListener("submit", event => {
     event.preventDefault(); // So that the page doesn't reload. 
     db.collection("cafes").add({
