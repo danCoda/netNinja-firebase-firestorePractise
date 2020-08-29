@@ -2,7 +2,7 @@ const cafeList = document.querySelector("#cafe-list");
 const form = document.querySelector("#add-cafe-form");
 
 // create element & render cafe
-function renderCafe(doc){
+function renderCafe(doc) {
     let li = document.createElement('li');
     let name = document.createElement('span');
     let city = document.createElement('span');
@@ -19,11 +19,13 @@ function renderCafe(doc){
 
     cafeList.appendChild(li);
 
+    //=============================================
     // Deleting data
+    //=============================================
     cross.addEventListener("click", e => {
         e.stopPropagation();
         let id = e.target.parentElement.getAttribute("data-id"); // See li.setAttribute('data-id', doc.id); above.
-        
+
         // Find the document, and delete.
         db.collection("cafes").doc(id).delete();
     });
@@ -47,18 +49,39 @@ function renderCafe(doc){
 });  */
 
 // React to changes:
-db.collection('cafes').orderBy("name").onSnapshot(snapshot => {
+db.collection('cafes').orderBy("city").onSnapshot(snapshot => {
     let changes = snapshot.docChanges();
     changes.forEach(change => {
+        console.log(change.type, change.doc.data());
         if (change.type === "added") { // Added, as well as initial (because you add them when page is loaded.)
             renderCafe(change.doc);
         } else if (change.type === "removed") {
-            let li = cafeList.querySelector(`[data-id=${change.doc.id}]`);
+            let li = cafeList.querySelector(`[data-id="${change.doc.id}"]`);
             cafeList.removeChild(li);
         }
     });
-
 });
+
+//=============================================
+// Updating data
+//=============================================
+let update = false;
+if (update) {
+    db.collection("cafes").doc("someDocId").update({
+        city: "New city"
+    });
+}
+
+//=============================================
+// Replacing data (set)... or creating it if it doesn't exis.
+//=============================================
+// Function will override the document and create a new one with the same docId.
+let set = false;
+if (set) {
+    db.collection("cafes").doc("set").set({
+        city: "New city"
+    });
+}
 
 //=============================================
 // Saving data
